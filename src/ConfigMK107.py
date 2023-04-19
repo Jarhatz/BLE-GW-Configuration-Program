@@ -23,13 +23,14 @@ def run():
         adapter = adapters[0]
         devices = scan(adapter, SCAN_DURATION)
         if (len(devices)):
-            device_index, status_number = filter(devices)
-            if (status_number == 2):
-                driver(devices[device_index])
-            elif (status_number == 1):
-                print(f"{devices[device_index].identifier()} [{devices[device_index].address()} DEVICE NOT FOUND.")
+            filtered_devices = filter(devices)
+            if (len(filtered_devices)):
+                for i, device in enumerate(filtered_devices):
+                    print(f"\n[{i}] CONFIGURING {device.identifier()} [{device.address()}]")
+                    configDriver(device)
+                    print(f"[{i}] CONFIGURED {device.identifier()} [{device.address()}]\n")
             else:
-                print(f"{DEVICE_NAME} DEVICE NOT FOUND.")
+                print(f"NO CONNECTABLE {DEVICE_NAME} DEVICE FOUND.")
         else:
             print("NO DEVICES SCANNED.")
         
@@ -46,17 +47,16 @@ def scan(adapter, time):
     return adapter.scan_get_results()
 
 def filter(devices):
-    not_connectable = 0
+    filtered_devices = []
     for i, device in enumerate(devices):
         if device.is_connectable() and device.identifier().startswith(DEVICE_NAME):
-            return (i, 2)
+            filtered_devices.append(device)
         elif device.identifier().startswith(DEVICE_NAME):
-            not_connectable = 1
-    return (i, not_connectable)
+            print(f"{device.identifier()} [{device.address()} DEVICE NOT CONNECTABLE.")
+    return filtered_devices
 
-def driver(device):
-    mac_address = device.address()
-    print(f"CONNECTING TO {device.identifier()} [{mac_address}]")
+def configDriver(device):
+    print(f"CONNECTING TO {device.identifier()} [{device.address()}]")
     device.connect()
     print("CONNECTED.")
     
