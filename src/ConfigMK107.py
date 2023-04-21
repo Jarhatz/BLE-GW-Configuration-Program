@@ -25,10 +25,18 @@ def run():
         if (len(devices)):
             filtered_devices = filter(devices)
             if (len(filtered_devices)):
+                successes = []
+                failures = []
                 for i, device in enumerate(filtered_devices):
-                    print(f"\n[{i}] CONFIGURING {device.identifier()} [{device.address()}]")
-                    configDriver(device)
-                    print(f"[{i}] CONFIGURED {device.identifier()} [{device.address()}]\n")
+                    try:
+                        print(f"\n[{i}] CONFIGURING {device.identifier()} [{device.address()}]")
+                        configDriver(device)
+                        print(f"[{i}] CONFIGURED {device.identifier()} [{device.address()}]\n")
+                        successes.append((device.identifier(), device.address()))
+                    except:
+                        failures.append((device.identifier(), device.address()))
+                print(f"\n\nSUCCESS: ({len(successes)}) {successes}")
+                print(f"FAILURE: ({len(failures)}) {failures}")
             else:
                 print(f"NO CONNECTABLE {DEVICE_NAME} DEVICE FOUND.")
         else:
@@ -77,6 +85,7 @@ def configDriver(device):
         writeConfig(device, scp, "0000aa03", payload, notify=True)
     else:
         print(f"\tWIFI SSID TOO LONG [{len(WIFI_SSID)}]")
+        raise Exception()
     
     print(f"WIFI PASSWORD: {WIFI_PASSWORD}")
     if len(WIFI_PASSWORD) <= 64:
@@ -84,6 +93,7 @@ def configDriver(device):
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tWIFI PASSWORD TOO LONG [{len(WIFI_PASSWORD)}]")
+        raise Exception()
     
     print("ENCRYPTION TYPE: Self Signed Certificates")
     writeConfig(device, scp, "0000aa03", "ED01040103")
@@ -94,6 +104,7 @@ def configDriver(device):
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tHOSTNAME TOO LONG [{len(MQTT_HOST)}]")
+        raise Exception()
         
     print("MQTT PORT: 8883")
     writeConfig(device, scp, "0000aa03", "ED01060222B3")
@@ -114,6 +125,7 @@ def configDriver(device):
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tCLIENT ID TOO LONG [{len(client_id)}]")
+        raise Exception()
         
     device_id = "site-" + SITE + "-gw-" + formatMAC(device.address())[-4:]
     print(f"DEVICE ID: {device_id}")
@@ -122,25 +134,28 @@ def configDriver(device):
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tDEVICE ID TOO LONG [{len(device_id)}]")
+        raise Exception()
     
-    subscribe_topic = "/gw/incoming/" + formatMAC(device.address())
+    subscribe_topic = "/gw/outgoing/" + formatMAC(device.address())
     print(f"SUBSCRIBE TOPIC: {subscribe_topic}")
     if len(subscribe_topic) <= 128:
         payload = generatePayload(cmd_id="0C", data_str=subscribe_topic)
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tSUBSCRIBE TOPIC TOO LONG [{len(subscribe_topic)}]")
+        raise Exception()
         
-    publish_topic = "/gw/outgoing/" + formatMAC(device.address())
+    publish_topic = "/gw/incoming/" + formatMAC(device.address())
     print(f"PUBLISH TOPIC: {publish_topic}")
     if len(publish_topic) <= 128:
         payload = generatePayload(cmd_id="0D", data_str=publish_topic)
         writeConfig(device, scp, "0000aa03", payload)
     else:
         print(f"\tSUBSCRIBE TOPIC TOO LONG [{len(publish_topic)}]")
+        raise Exception()
     
-    print("NTP SERVER: time.windows.com")
-    writeConfig(device, scp, "0000aa03", "ED010E0F74696D652E77696E646F77732E636F6D")
+    # print("NTP SERVER: time.windows.com")
+    # writeConfig(device, scp, "0000aa03", "ED010E0F74696D652E77696E646F77732E636F6D")
     
     print("TIMEZONE: UTC-7:00")
     writeConfig(device, scp, "0000aa03", "ED010F01F9")
@@ -166,7 +181,7 @@ def configDriver(device):
 
 def writeConfig(device, scp, search_characteristic, payload, notify=False):
     i = scp.find(search_characteristic)
-    if i:
+    if i != None:
         service_uuid, characteristic_uuid = scp.get(i)
         print(f"\tService: [{service_uuid}]")
         print(f"\tCharacteristic: [{characteristic_uuid}]")
@@ -176,6 +191,7 @@ def writeConfig(device, scp, search_characteristic, payload, notify=False):
             response = device.notify(service_uuid, characteristic_uuid, lambda data: print(f"\tResponse: {codecs.encode(data, 'hex').decode('utf-8').upper()}"))
     else:
         print(f"CHARACTERISTIC [{search_characteristic}] NOT FOUND.")
+        raise Exception()
 
 def generatePayload(cmd_id, data_str):
     length = "{:02X}".format(len(data_str))
@@ -184,7 +200,7 @@ def generatePayload(cmd_id, data_str):
 
 def partitionFile(device, scp, search_characteristic, file_bytes, cmd_id):
     i = scp.find(search_characteristic)
-    if i:
+    if i != None:
         service_uuid, characteristic_uuid = scp.get(i)
         print(f"\tService: [{service_uuid}]")
         print(f"\tCharacteristic: [{characteristic_uuid}]")
@@ -198,6 +214,7 @@ def partitionFile(device, scp, search_characteristic, file_bytes, cmd_id):
             num_packets -= 1
     else:
         print(f"CHARACTERISTIC [{search_characteristic}] NOT FOUND.")
+        raise Exception()
 
 def generateFilePayload(cmd_id, file_chunk, num_packets, first=False):
     flag = "{:02X}".format(int(first))
