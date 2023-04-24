@@ -2,18 +2,20 @@ import simplepyble # pip install simplepyble
 import codecs
 import time
 
-# # # MODIFY AND UPDATE CONSTANTS TO FIT YOUR NEEDS # # #
-WIFI_SSID = "[NETWORK_NAME]"
-WIFI_PASSWORD = "[NETWORK_PWD]"
-SITE = "[PREFIX FOR DEVICE NAMING CONVENTION]"
+# Modify these values to customize
+WIFI_SSID = "Make WiFi Great Again"
+WIFI_PASSWORD = "subbiminchu1!"
+SITE = "0"
 
-SCAN_DURATION = 5000 # 5 sec
-DEVICE_NAME = 'MK107'
-MQTT_HOST = "[AWS_IOT_ENDPOINT]" # port (default): 8883
+# # # DO NOT MODIFY VALUES BELOW THIS LINE # # #
 
-CA_FILE = r"\certs\AmazonRootCA1.pem"
-CLIENT_CERTIFICATE_FILE = r"\certs\client-certificate.pem.crt"
-CLIENT_KEY_FILE = r"\certs\client-key-private.pem.key"
+SCAN_DURATION = 5000 # milliseconds
+DEVICE_NAME = 'MK107' # pwd: Moko4321
+MQTT_HOST = "a309xxhc18goo4-ats.iot.us-west-2.amazonaws.com" # port: 8883
+
+CA_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\AmazonRootCA1.pem"
+CLIENT_CERTIFICATE_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\client-certificate.pem.crt"
+CLIENT_KEY_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\client-key-private.pem.key"
 
 def run():
     adapters = simplepyble.Adapter.get_adapters()
@@ -113,7 +115,7 @@ def configDriver(device):
     writeConfig(device, scp, "0000aa03", "ED01070101")
     
     print("MQTT KEEP ALIVE: 30")
-    writeConfig(device, scp, "0000aa03", "ED0108011E")
+    writeConfig(device, scp, "0000aa03", "ED0108013C")
     
     print("MQTT QOS: 1")
     writeConfig(device, scp, "0000aa03", "ED01090101")
