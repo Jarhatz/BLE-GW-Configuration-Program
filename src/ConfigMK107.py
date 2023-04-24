@@ -160,7 +160,10 @@ def configDriver(device):
     # writeConfig(device, scp, "0000aa03", "ED010E0F74696D652E77696E646F77732E636F6D")
     
     print("TIMEZONE: UTC-7:00")
-    writeConfig(device, scp, "0000aa03", "ED010F01F9")
+    writeConfig(device, scp, "0000aa03", "ED011901F2")
+    
+    print("WIFI CHANNEL: WORLDWIDE")
+    writeConfig(device, scp, "0000aa03", "ED011A0115")
     
     print("--- CA FILE ---")
     partitionFile(device, scp, "0000aa03", getFileBytes(CA_FILE), "03")
