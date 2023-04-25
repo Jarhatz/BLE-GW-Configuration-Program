@@ -3,19 +3,19 @@ import codecs
 import time
 
 # Modify these values to customize
-WIFI_SSID = "Make WiFi Great Again"
-WIFI_PASSWORD = "subbiminchu1!"
+WIFI_SSID = "<YOUR WIFI NAME>"
+WIFI_PASSWORD = "<YOUR WIFI PWD>"
 SITE = "0"
 
 # # # DO NOT MODIFY VALUES BELOW THIS LINE # # #
 
-SCAN_DURATION = 5000 # milliseconds
-DEVICE_NAME = 'MK107' # pwd: Moko4321
-MQTT_HOST = "a309xxhc18goo4-ats.iot.us-west-2.amazonaws.com" # port: 8883
+SCAN_DURATION = 5 # sec
+DEVICE_NAME = "MK107"
+MQTT_HOST = "<YOUR HOSTNAME>" # port (default): 8883
 
-CA_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\AmazonRootCA1.pem"
-CLIENT_CERTIFICATE_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\client-certificate.pem.crt"
-CLIENT_KEY_FILE = r"C:\Users\Rajath\OneDrive\Documents\Code Projects\RTLS Project\BLE_GW_Config_Program\BLE-GW-ConfigProgram\certs\client-key-private.pem.key"
+CA_FILE = r"./certs/AmazonRootCA1.pem"
+CLIENT_CERTIFICATE_FILE = r"./certs/client-certificate.pem.crt"
+CLIENT_KEY_FILE = r"./certs/client-key-private.pem.key"
 
 def run():
     adapters = simplepyble.Adapter.get_adapters()
@@ -23,7 +23,7 @@ def run():
         print("NO ADAPTERS FOUND.")
     else:
         adapter = adapters[0]
-        devices = scan(adapter, SCAN_DURATION)
+        devices = scan(adapter)
         if (len(devices)):
             filtered_devices = filter(devices)
             if (len(filtered_devices)):
@@ -43,9 +43,8 @@ def run():
                 print(f"NO CONNECTABLE {DEVICE_NAME} DEVICE FOUND.")
         else:
             print("NO DEVICES SCANNED.")
-        
 
-def scan(adapter, time):
+def scan(adapter):
     print(f"USING {adapter.identifier()} [{adapter.address()}]")
     adapter.set_callback_on_scan_start(lambda: print("SCAN STARTED."))
     adapter.set_callback_on_scan_stop(lambda: print("SCAN COMPLETE."))
@@ -53,7 +52,7 @@ def scan(adapter, time):
         f"\t(connectable) {device.identifier()} [{device.address()}]") 
         if device.is_connectable() else print(
         f"\t(not-connectable) {device.identifier()} [{device.address()}]"))
-    adapter.scan_for(time)
+    adapter.scan_for(SCAN_DURATION * 1000)
     return adapter.scan_get_results()
 
 def filter(devices):
